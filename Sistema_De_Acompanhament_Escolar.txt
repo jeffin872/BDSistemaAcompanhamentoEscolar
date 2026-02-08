@@ -1,0 +1,124 @@
+create table usuario (
+	id_usuario SERIAL primary key,
+	cpf varchar(11) not null unique, 
+	/* vou usar o constraint para receber que quando houver erro, 
+	 * para que o nome da restriçãoo no erro "*/
+	constraint checar_formato_cpf check (cpf ~ '^[0-9]{11}$'),
+	email varchar(255) not null unique,	
+	constraint checar_formato_email check (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'),
+	/*Vou salvar a senha no banco como um hash, para isso esse sistema vai usar token jwt no back*/
+	senha_hash text not null,
+	nome varchar(150) not null, 
+	tipo_usuario varchar(20) not null check (tipo_usuario in ('ADMIN', 'PROFESSOR', 'RESPONSAVEL'))
+);
+
+create table turma (
+	id_turma SERIAL primary key,
+	nome_turma varchar(50) not null unique,
+	ano_letivo integer not null 
+	
+);
+
+create table responsavel (
+	id_responsavel SERIAL primary key,
+	id_usuario integer not null unique, 
+	constraint fk_usuario_responsavel foreign key (id_usuario) 
+		references usuario(id_usuario) on delete cascade
+);
+create table disciplina (
+	id_disciplina SERIAL primary key,
+	nome_disciplina varchar(50) not null unique
+);
+create table estudante(
+	id_estudante SERIAL primary key,
+	id_turma integer not null,
+	id_responsavel integer not null,
+	nome varchar(150) not null,
+	matricula varchar(7) not null unique,
+	data_nascimento date not null, 
+	constraint fk_turma_do_aluno foreign key (id_turma)
+		references turma(id_turma) on delete restrict,
+	constraint fk_responsavel_estudante foreign key (id_responsavel)
+		references responsavel(id_responsavel) on delete restrict 	
+);
+
+create table professor(
+	id_professor SERIAL primary key,
+	id_usuario integer not null unique,
+	constraint fk_usuario_professor foreign key (id_usuario) 
+		references usuario(id_usuario) on delete cascade
+);	
+
+/*Criação da tabela associativa de professor e turma, por causa da relação n,n*/
+
+create table professor_turma(
+	id_professor integer not null,
+	id_turma integer not null,
+	primary key (id_professor, id_turma),
+	constraint fk_pt_professor foreign key (id_professor)
+		references professor(id_professor) on delete cascade,
+	constraint fk_pt_turma foreign key (id_turma) 
+		references turma(id_turma) on delete cascade
+);
+
+create table acompanhamento(
+	id_acompanhamento SERIAL primary key,
+	id_professor integer not null,
+	id_estudante integer not null,
+	id_disciplina integer not null,
+	data_registro timestamp default CURRENT_TIMESTAMP,
+	tipo_acompanhamento varchar(20) check (tipo_acompanhamento in ('NOTA', 'FALTA', 'OCORRENCIA')),
+	/*esse registro sera pra nota e quantidade de falta, se for ocorrência o professor deixa null colocando só a descrição da ocorrência*/
+	periodo_avaliacao varchar(20) check (periodo_avaliacao in('1BIM','2BIM','3BIM','4BIM','RECUPERACAO','FINAL')),
+	valor numeric(5,2), 
+	
+	constraint checar_valor_nota check
+	(tipo_acompanhamento <> 'NOTA' OR (valor is not null and valor >= 0 and valor <= 100)),
+	
+	constraint checar_valor_falta check
+	(tipo_acompanhamento <> 'FALTA' or (valor is not null and valor >=0)),
+	
+	descricao text,
+	constraint fk_professor_acompanhamento foreign key (id_professor)
+		references professor(id_professor) on delete restrict,
+		
+	constraint fk_estudante_acompanhamento foreign key (id_estudante)
+		references estudante(id_estudante) on delete cascade,
+		
+	constraint fk_disciplina_acompanhamento foreign key (id_disciplina)
+		references disciplina(id_disciplina) on delete restrict
+);
+
+create table falta_justificada(
+	id_falta_justificada SERIAL primary key, 
+	id_responsavel integer not null,
+	id_estudante integer not null,
+	data_falta date not null,
+	status_analise varchar(20) not null check (status_analise in ('PENDENTE', 'VALIDO', 'RECUSADO')),
+	/*deixei só o text, mas numa aplicação real colocaria o caminho do servidor onde o arquivo que o responsavel upou estaria*/
+	documento_URL text not null,
+	constraint fk_estudante_falta foreign key (id_estudante)
+		references estudante(id_estudante) on delete cascade,
+	
+	constraint fk_responsavel_falta foreign key (id_responsavel) 
+		references responsavel(id_responsavel) on delete restrict
+);
+
+create table evento_calendario (
+	id_evento SERIAL primary key,
+	id_turma integer not null,
+	data_evento date not null,
+	tipo_evento varchar(100) not null check (tipo_evento in ('PROVA', 'TRABALHO', 'REUNIAO', 'VIAGEM', 'FINAL')),
+	descricao_evento text not null,
+	constraint fk_turma_evento foreign key (id_turma)
+		references turma(id_turma) on delete cascade
+);
+
+
+
+
+
+
+
+
+
