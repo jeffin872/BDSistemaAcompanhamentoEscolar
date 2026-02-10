@@ -82,4 +82,4 @@ Arquivo/Upload: nesta entrega guardamos apenas texto/caminho de arquivo no banco
 * Tudo em uma tabela acompanhamento: 
 por rapidez e simplicidade, usamos uma tabela polimórfica (nota/falta/ocorrência).      
 
-Quando for codar de verdade, a gente planeja fazer tabelas diferentes para separar nota, falta e ocorrencia, isso facilita relatórios e regras mais complexas posteriormente.
+Quando for codar o projeto e fazer as integrações coom o back, a gente planeja fazer tabelas diferentes para separar nota, falta e ocorrencia, isso facilita relatórios e regras mais complexas posteriormente.
