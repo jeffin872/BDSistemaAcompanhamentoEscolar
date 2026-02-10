@@ -79,28 +79,7 @@ Escolhas para a entrega (por que simplificamos)
 
 Arquivo/Upload: nesta entrega guardamos apenas texto/caminho de arquivo no banco (campo documento_url). Acreditamos que isso é suficiente para demonstrar modelagem.
 
-* Tudo em uma tabela acompanhamento: por rapidez e simplicidade, usamos uma tabela polimórfica (nota/falta/ocorrência).       Quando for codar de verdade, a gente planeja fazer tabelas diferentes para separar nota, falta e ocorrencia, isso facilita relatórios e regras mais complexas posteriormente.
+* Tudo em uma tabela acompanhamento: 
+por rapidez e simplicidade, usamos uma tabela polimórfica (nota/falta/ocorrência).      
 
-## Como testar localmente (passo a passo para iniciantes — DBeaver)
-
-Abra o DBeaver e conecte ao PostgreSQL (ou outro banco que você use).
-
-Crie um banco novo (opcional): CREATE DATABASE nome_do_banco; — execute a partir do banco postgres ou pela interface de criação.
-
-No DBeaver: botão direito em seu banco → SQL Editor → New SQL Script.
-
-Cole o arquivo .sql (o script do repositório). Antes de executar, verifique se não há erros de digitação (ex.: create escrito corretamente).
-
-Execute todo o script com Alt + X (executa tudo) — ou, se preferir, selecione todos os comandos e dê Ctrl+Enter.
-
-Após execução, atualize o painel de Tables (clique com botão direito → Refresh) e verifique se as tabelas foram criadas.
-
-Faça inserts de teste (Colcoando sempre na ordem das tabelas pai e depois filhos). Exemplo rápido para testar (roda um INSERT por vez):
-
-INSERT INTO usuario (cpf, email, senha_hash, nome, tipo_usuario)
-VALUES ('11111111111','admin@escola.com','hash','Admin','ADMIN');
-
-INSERT INTO turma (nome_turma, ano_letivo) VALUES ('5A', 2025);
-INSERT INTO disciplina (nome_disciplina) VALUES ('Matemática');
-
--- depois inserir responsavel, professor, estudante etc.
+Quando for codar de verdade, a gente planeja fazer tabelas diferentes para separar nota, falta e ocorrencia, isso facilita relatórios e regras mais complexas posteriormente.
