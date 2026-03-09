@@ -1,85 +1,28 @@
-## 🗄️ Projeto Físico de Banco de Dados
+## 🏫 Plataforma de Acompanhamento Escolar
 
-Após a fase de **planejamento**, que foi a criação/confecção dos diagramas DER/Lógico, passamos para a fase inicial de **execução** do desenvolvimento do sistema: a criação do **Projeto Físico de Banco de Dados**, apresentado neste repositório.
+Este projeto tem como objetivo centralizar e facilitar a comunicação entre a secretaria escolar, professores e responsáveis. Através de uma interface intuitiva, buscamos transformar dados complexos em informações acessíveis para o dia a dia pedagógico.
 
-É nesta etapa que traduzimos os diagramas para a linguagem real de programação (**SQL**). Aqui, definimos o que vamos guardar e *como* vamos guardar (as regras de negócio), isto é:
+🎨 Como foi prototipar um Wireframe?
+Prototipar um wireframe não é desenhar a tela final, mas sim validar o esqueleto e a lógica do sistema, Consultando um amigo meu da area ele me disse que muitas vezes já fez um design de um projeto que o cliente não aprovou o que gerou um grande gasto de energia a toa, e esse problema pode ser sanado com protótipos de baixa fidelidade que é o wireframe. Aqui estão as orientações fundamentais que segui neste processo:
 
-* Qual será o limite de caracteres de um nome;
-* Qual campo é numérico ou texto;
-* Quais regras de segurança impedem dados inválidos.
-* As relações entre as tabelas
+*Entenda o Fluxo, não o Visual: Antes de abrir qualquer ferramenta, desenhe o caminho que o usuário faz. Se o pai quer ver a nota, quantos cliques ele dá? ou seja, quanto mais simples for melhor. 
 
-### 🎯 Importância
-Aprender o projeto físico é fundamental porque o banco de dados é o **alicerce** do seu sistema/aplicação. Um código SQL bem feito (com restrições e tipagem correta) impede que o sistema aceite e-mails inválidos, CPFs errados ou notas negativas, facilitando muito o trabalho de quem desenvolve o Back-end e garantindo a **integridade da informação**.
+*Foco na Estrutura (Baixa Fidelidade): Evite cores chamativas ou imagens complexas no início. O objetivo é testar se a posição dos botões e menus faz sentido.
 
+*Hierarquia de Informação: O que é mais importante deve estar em destaque. Use tamanhos diferentes de blocos para indicar o que o usuário deve olhar primeiro.
 
-## O que tem neste arquivo .sql
+*Consistência: Mantenha o mesmo padrão de botões e menus em todas as telas. Isso reduz a curva de aprendizado do usuário, porque se tem vários botões com cores diferentes e etc.. o usuário sempre vai ficar confuso.
 
-No script você encontrará as tabelas principais do sistema escolar (modelo simplificado para entrega):
+*Valide o "Óbvio": O que parece claro para quem desenvolve, pode ser muito confuso para o usuário final, pois nem todos tem a mesma intimidade com a informática (pra mim essa é uma das mais importantes).
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+## Sobre o Design Centrado no Usuário (UCD):
+Não é apenas sobre estética, é sobre o usuário conseguir utilizar todas as funções sem dificuldade. No desenvolvimento desta plataforma, percebi que muitas vezes tentamos criar interfaces "completas demais", esquecendo que o usuário (seja um pai cansado após o trabalho ou um professor com pouco tempo) precisa de rapidez e clareza.
 
-* usuario — dados de login e identificação (email, cpf, senha_hash, tipo);
+O Impacto da IHC (Interface Humano-Computador)
+A forma como interagimos com as máquinas impacta diretamente a qualidade de vida na sociedade:
 
-* turma — turmas existentes;
+Inclusão Digital: Sistemas simples permitem que pessoas com pouca experiência em tecnologia não se sintam excluídas.
 
-* disciplina — disciplinas do curso;
+Redução de Erros: Uma interface bem pensada evita que uma nota seja lançada errada ou que um atestado importante seja ignorado pela secretaria, porque pesquisando vi que quando o usuário possui várias funções ele fica meio perdido e pode acontecer errar informações importantes ou esquecer de alguma coisa.
 
-* responsavel — responsáveis (ligados a usuario);
-
-* professor — professores (ligados a usuario);
-
-* estudante — dados dos alunos (chaque turma e responsável);
-
-* professor_turma — tabela associativa (N:N) entre professor e turma;
-
-* acompanhamento — notas / faltas / ocorrências por disciplina e período;
-
-* falta_justificada — justificativas de faltas (texto, por enquanto);
-
-* evento_calendario — eventos da turma (provas, reuniões, etc).
-
-## Principais decisões e justificativas 
-
-* CPF sem máscara no banco: armazenamos apenas números (ex.: 12345678900). A máscara (. e -) que vem normalmente no cpf, a gente pensou em tratar isso no back-end, quando o usuário informar a gente pega o cpf 123.456.789-00 e transforma só em digitos pro banco -> 12345678900.
-
-* E-mail como login: escolhemos o e-mail como identificador para login (é mais comum e prático). O CPF permanece como dado cadastral e único.
-
-* Senha como senha_hash: Não armazenamos senhas em texto puro por segurança. Já fiz (jefferson) um projeto que tinha login e usei essa lib para o back-end (Python/Flask) que gera um hash utilizando a biblioteca werkzeug.security (generate_password_hash) e salva apenas esse valor no banco.
-  Quando o usuário faz login, o sistema utiliza check_password_hash para comparar a senha digitada com o hash armazenado.
-  Após a validação, o sistema pode gerar um token JWT para manter o usuário autenticado.
-
-* IDs automáticos: usamos SERIAL (ou IDENTITY) para gerar identificadores numéricos automáticos nas PKs.
-
-* Tabelas de especialização (professor / responsavel): cada professor e responsável é também um usuario. Mantemos id_usuario como UNIQUE em professor/responsavel para garantir 1:1 (um usuário só pode ser cadastrado como professor uma vez).
-
-* Chaves estrangeiras e ações ON DELETE:
-
-  estudante → ON DELETE RESTRICT para impedir apagar turma quando há alunos (depende do requisito).
-
-  falta_justificada.id_estudante → ON DELETE CASCADE: se o aluno for removido, não faz sentido manter justificativas.
-
-  falta_justificada.id_responsavel → ON DELETE RESTRICT (escolhemos RESTRICT para preservar histórico e evitar perda não      intencional).
-
-  professor_turma e evento_calendario → ON DELETE CASCADE em turma/professor quando faz sentido apagar registros              dependentes.
-
-* Tabela acompanhamento: formatada para registrar notas (0–100), faltas e ocorrências. Inclui:
-
-  tipo_acompanhamento (NOTA / FALTA / OCORRENCIA);
-
-  periodo_avaliacao (1BIM, 2BIM, 3BIM, 4BIM, RECUPERACAO, FINAL);
-
-  valor numeric(5,2) com CHECK para garantir 0 ≤ valor ≤ 100 quando for NOTA;
-
-  descricao para ocorrências (mas pode ser usada pra notas e faltas também).
-
-  Possui FK para professor, estudante e disciplina.
-
-* Justificativas de falta: por enquanto apenas texto (documento_url contém texto explicativo). Em produção, a aplicação fará upload do PDF e gravará o caminho/URL no banco (não guardamos o arquivo dentro do banco por padrão).
-
-Escolhas para a entrega (por que simplificamos)
-
-Arquivo/Upload: nesta entrega guardamos apenas texto/caminho de arquivo no banco (campo documento_url). Acreditamos que isso é suficiente para demonstrar modelagem.
-
-* Tudo em uma tabela acompanhamento: 
-por rapidez e simplicidade, usamos uma tabela polimórfica (nota/falta/ocorrência).      
-
-Quando for codar o projeto e fazer as integrações coom o back, a gente planeja fazer tabelas diferentes para separar nota, falta e ocorrencia, isso facilita relatórios e regras mais complexas posteriormente.
+*Aprendi que o nosso 'óbvio' raramente é o óbvio do usuário. Design centrado no usuário é a arte de simplificar o complexo para que a tecnologia sirva às pessoas, e não o contrário.
